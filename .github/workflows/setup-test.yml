@@ -1,0 +1,25 @@
+name: Setup test
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Run setup
+        run: node setup.mjs
+      - name: Doctor (on failure)
+        if: failure()
+        run: cd kit/video-projects/demo && npx hyperframes doctor
+      - uses: actions/upload-artifact@v4
+        with:
+          name: setup-test-video
+          path: outbox/setup-test.mp4
